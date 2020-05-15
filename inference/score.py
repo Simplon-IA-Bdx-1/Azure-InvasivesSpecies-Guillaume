@@ -41,7 +41,7 @@ def run(input_data):
 
     base64_decoded = base64.b64decode(data.strip())
     image = Image.open(io.BytesIO(base64_decoded))
-    image_np = np.array(image)
+    image_np = np.array(image)/255
 
     print("input shape")
     print(image_np.shape)
