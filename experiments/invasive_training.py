@@ -34,8 +34,10 @@ run = Run.get_context()
 
 #dataset = "./data"
 print(run.input_datasets['images'])
+
 train_img_dir = run.input_datasets['images']
 labels_dataset = run.input_datasets['labels']
+
 #fulltrain_dir = path.join(dataset,"train")
 #test_dir = path.join(dataset,"test")
 
@@ -47,7 +49,7 @@ SEED=42
 TARGET_SIZE=(args.img_size, args.img_size)
 BATCH_SIZE = args.batch_size
 EPOCHS = args.epoch
-tranfer_learning == args.transfer_learning
+transfer_learning = args.transfer_learning
 
 run.log('image_size', TARGET_SIZE)
 run.log('batch_size', BATCH_SIZE)
@@ -130,7 +132,7 @@ LEARNING_RATE = 0.01
 if args.transfer_learning == 'VGG16':
     model = build_VGG16(size=TARGET_SIZE)
 else:
-    tranfer_learning == 'false'
+    transfer_learning == 'false'
     model = build_model(size=TARGET_SIZE)
 model.compile(loss=loss, optimizer='adamax', metrics=metrics)
 #model.summary()
@@ -191,7 +193,7 @@ model.save('my_model.hdf5')
 run.upload_file('model', path_or_stream='my_model.hdf5')
 run.register_model(model_path="model",
                model_name="InvasiveCNN",
-               tags={'AUC': auc_score, 'transfer-learning': args.transfer_learning, 'image_size': str(TARGET_SIZE), 'batch_size': BATCH_SIZE, 'epochs': EPOCHS},
+               tags={'AUC': auc_score, 'transfer-learning': transfer_learning, 'image_size': str(TARGET_SIZE), 'batch_size': BATCH_SIZE, 'epochs': EPOCHS},
                description="simple CNN",
                model_framework=Model.Framework.TENSORFLOW,
                model_framework_version=tf.__version__,
