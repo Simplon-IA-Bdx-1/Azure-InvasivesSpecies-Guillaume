@@ -15,6 +15,7 @@ from tensorflow.keras.layers import Dense, Activation, Input, Conv2D, MaxPooling
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.optimizers import SGD,RMSprop,Adam
 from tensorflow.keras.metrics import AUC
+from tensorflow.keras.applications.vgg16 import VGG16
 from azureml.core import Run
 from azureml.core import Model
 from sklearn.metrics import roc_curve, auc, accuracy_score
@@ -23,6 +24,7 @@ parser = argparse.ArgumentParser(description='Train a model')
 parser.add_argument('--img_size', type=int, required=True)
 parser.add_argument('--batch_size', type=int, required=True)
 parser.add_argument('--epoch', type=int, required=True)
+parser.add_argument('--transfer_learning', default='false')
 
 args = parser.parse_args()
 
@@ -45,6 +47,7 @@ SEED=42
 TARGET_SIZE=(args.img_size, args.img_size)
 BATCH_SIZE = args.batch_size
 EPOCHS = args.epoch
+tranfer_learning == args.transfer_learning
 
 run.log('image_size', TARGET_SIZE)
 run.log('batch_size', BATCH_SIZE)
@@ -101,12 +104,34 @@ def build_model(size=(64,64)):
         Activation('sigmoid')
     ])
 
+def build_VGG16(size=(64,64)):
+    model = VGG16(weights= 'imagenet', include_top=False, input_shape=(size[0],size[1],3))
+    
+    for layer in model.layers:
+        layer.trainable = False
+        
+    output = model.output
+    output = Flatten()(output)
+    output = Dropout(rate=0.5)(output)
+    output = Dense(128)(output)
+    output = Activation('relu')(output)
+    output = Dropout(rate=0.5)(output)
+    output = Dense(1)(output)
+    output = Activation('sigmoid')(output)
+    
+    model = Model(model.input, output)
+    return model
+
 loss='binary_crossentropy'
 metrics=[AUC()]
 LEARNING_RATE = 0.01
 #EPOCHS = 20
 
-model = build_model(size=TARGET_SIZE)
+if args.transfer_learning == 'vgg16':
+    model = build_VGG16(size=TARGET_SIZE)
+else:
+    tranfer_learning == 'false'
+    model = build_model(size=TARGET_SIZE)
 model.compile(loss=loss, optimizer='adamax', metrics=metrics)
 #model.summary()
 
@@ -166,7 +191,7 @@ model.save('my_model.hdf5')
 run.upload_file('model', path_or_stream='my_model.hdf5')
 run.register_model(model_path="model",
                model_name="InvasiveCNN",
-               tags={'AUC': auc_score, 'transfer-learning': False, 'image_size': str(TARGET_SIZE), 'batch_size': BATCH_SIZE, 'epochs': EPOCHS},
+               tags={'AUC': auc_score, 'transfer-learning': args.transfer_learning, 'image_size': str(TARGET_SIZE), 'batch_size': BATCH_SIZE, 'epochs': EPOCHS},
                description="simple CNN",
                model_framework=Model.Framework.TENSORFLOW,
                model_framework_version=tf.__version__,
