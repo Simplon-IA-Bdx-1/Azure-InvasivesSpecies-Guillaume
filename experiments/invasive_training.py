@@ -16,6 +16,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.optimizers import SGD,RMSprop,Adam
 from tensorflow.keras.metrics import AUC
 from tensorflow.keras.applications.vgg16 import VGG16
+from tensorflow.keras.models import Model as TFModel
 from azureml.core import Run
 from azureml.core import Model
 from sklearn.metrics import roc_curve, auc, accuracy_score
@@ -121,7 +122,7 @@ def build_VGG16(size=(64,64)):
     output = Dense(1)(output)
     output = Activation('sigmoid')(output)
     
-    model = Model(model.input, output)
+    model = TFModel(model.input, output)
     return model
 
 loss='binary_crossentropy'
