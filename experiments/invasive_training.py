@@ -55,7 +55,7 @@ run.log('epochs', EPOCHS)
 
 print(labels.head())
 
-labels_train,labels_valid = train_test_split(labels, test_size=0.2, random_state=SEED)
+labels_train,labels_valid = train_test_split(labels, test_size=0.15, random_state=SEED)
 
 train_datagen = ImageDataGenerator(horizontal_flip=True,
                                    rotation_range=10,
@@ -127,7 +127,7 @@ metrics=[AUC()]
 LEARNING_RATE = 0.01
 #EPOCHS = 20
 
-if args.transfer_learning == 'vgg16':
+if args.transfer_learning == 'VGG16':
     model = build_VGG16(size=TARGET_SIZE)
 else:
     tranfer_learning == 'false'
